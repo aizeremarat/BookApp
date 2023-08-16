@@ -33,21 +33,34 @@ public class BookController {
             Book savedBook = bookRepository.save(book);
             return ResponseEntity.ok(savedBook);
         }
-    @PutMapping("/books/{id}")
-    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book updatedBook) {
+        @PutMapping("/books/{id}")
+        public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book updatedBook) {
+            Optional<Book> optionalBook = bookRepository.findById(id);
+
+            if (optionalBook.isPresent()) {
+                Book existingBook = optionalBook.get();
+                existingBook.setTitle(updatedBook.getTitle());
+                existingBook.setAuthor(updatedBook.getAuthor());
+                existingBook.setRelease(updatedBook.getRelease());
+
+                Book savedBook = bookRepository.save(existingBook);
+                return ResponseEntity.ok(savedBook);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
+
+    @DeleteMapping("/books/{id}")
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         Optional<Book> optionalBook = bookRepository.findById(id);
 
         if (optionalBook.isPresent()) {
-            Book existingBook = optionalBook.get();
-            existingBook.setTitle(updatedBook.getTitle());
-            existingBook.setAuthor(updatedBook.getAuthor());
-            existingBook.setRelease(updatedBook.getRelease());
-
-            Book savedBook = bookRepository.save(existingBook);
-            return ResponseEntity.ok(savedBook);
+            bookRepository.delete(optionalBook.get());
+            return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+
 
 }
